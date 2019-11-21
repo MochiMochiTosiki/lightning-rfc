@@ -1,3 +1,5 @@
+## おかしい翻訳があったらプルリク下さい
+
 # [Lightning Network](https://lightning.network) In-Progress Specifications
 
 The specifications are currently a work-in-progress and currently being

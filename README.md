@@ -1,4 +1,4 @@
-# test
+## 翻訳がおかしい場合はご指摘下さい
 
 # [Lightning Network](https://lightning.network) In-Progress Specifications
 

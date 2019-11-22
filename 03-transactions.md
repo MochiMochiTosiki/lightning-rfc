@@ -2,6 +2,9 @@
 
 This details the exact format of on-chain transactions, which both sides need to agree on to ensure signatures are valid. This consists of the funding transaction output script, the commitment transactions, and the HTLC transactions.
 
+> これは署名が有効であるために双方が同意する必要のある on-chainn transaction の形式を詳述します。
+> これは funding transaction output script, その commitment transactions と,その HTLC transactions で成り立っています。
+
 # Table of Contents
 
   * [Transactions](#transactions)
@@ -43,6 +46,8 @@ This details the exact format of on-chain transactions, which both sides need to
 ## Transaction Input and Output Ordering
 
 Lexicographic ordering: see [BIP69](https://github.com/bitcoin/bips/blob/master/bip-0069.mediawiki).  In the case of identical HTLC outputs, the outputs are ordered in increasing `cltv_expiry` order.
+
+> 辞書式順序: [BIP69](https://github.com/bitcoin/bips/blob/master/bip-0069.mediawiki) を見てください。  同一の HTLC outputsの場合、そのoutputsは`cltv_expiry`の昇順で並べられます。
 
 ## Rationale
 

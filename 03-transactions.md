@@ -57,6 +57,8 @@ This only matters because the same ordering is used to send
 `htlc_signatures` and the HTLC transactions themselves are different,
 thus the two peers must agree on the canonical ordering for this case.
 
+> 同じ`amount_msat`と`payment_hash`を二つのHTLCsが出したとしても、それらの `cltv_expiry` は異なります。同じ順序で`htlc_signatures`とHTLC transactions が送信に使われるため、これは重要です。従って2つのピアは標準的な順序に同意する必要があります。
+
 ## Use of Segwit
 
 Most transaction outputs used here are pay-to-witness-script-hash<sup>[BIP141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#witness-program)</sup> (P2WSH) outputs: the Segwit version of P2SH. To spend such outputs, the last item on the witness stack must be the actual script that was used to generate the P2WSH output that is being spent. This last item has been omitted for brevity in the rest of this document.

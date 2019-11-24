@@ -63,6 +63,9 @@ thus the two peers must agree on the canonical ordering for this case.
 
 Most transaction outputs used here are pay-to-witness-script-hash<sup>[BIP141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#witness-program)</sup> (P2WSH) outputs: the Segwit version of P2SH. To spend such outputs, the last item on the witness stack must be the actual script that was used to generate the P2WSH output that is being spent. This last item has been omitted for brevity in the rest of this document.
 
+> ここで最も使われている transaction outputsはpay-to-witness-script-hash<sup>[BIP144](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#witness-program)</sup>(P2WSH) outputs: Segwit のバージョンはP2SHです。このようなoutputsを使うには、witness stackの最後の項目が、使用されているP2WSH outputの生成に使用された実際のscriptでなければなりません。このドキュメントの残りの部分では、簡潔にするためにこの最後の項目は省略されています。
+
+
 ## Funding Transaction Output
 
 * The funding output script is a P2WSH to:

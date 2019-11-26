@@ -74,6 +74,8 @@ Most transaction outputs used here are pay-to-witness-script-hash<sup>[BIP141](h
 
 * Where `pubkey1` is the numerically lesser of the two DER-encoded `funding_pubkey` and where `pubkey2` is the numerically greater of the two.
 
+> ここでの`pubkey1`は 2つの DER-encoded された `funding_pubkey`の小さい値と `pubkwy2`は2つの数の大きい値です。
+
 ## Commitment Transaction
 
 * version: 2
@@ -83,10 +85,20 @@ Most transaction outputs used here are pay-to-witness-script-hash<sup>[BIP141](h
    * `txin[0]` sequence: upper 8 bits are 0x80, lower 24 bits are upper 24 bits of the obscured commitment number
    * `txin[0]` script bytes: 0
    * `txin[0]` witness: `0 <signature_for_pubkey1> <signature_for_pubkey2>`
+   
+> * version: 2
+> * locktime: 上位 8 bitsは 0x20, 下位 24 bits は不明瞭なcommitment numberの 24 bits です
+> * txin count: 1
+>	* `txin[0]` outpoint: `funding_created` message の `txid` と `output_index`
+>	* `txin[0]` sequence: 上位 8 bits は 0x80, 下位 24 bits は 不明瞭な commitment number 24 bits です
+>	* `txin[0]` script bytes: 0
+>	* `txin[0]` witness: `0 <signature_for_pubkey1> <signature_for_pubkey2>`
 
 The 48-bit commitment number is obscured by `XOR` with the lower 48 bits of:
 
     SHA256(payment_basepoint from open_channel || payment_basepoint from accept_channel)
+> 48-bit commitment number は `XOR` によって 48 bitsより低い：
+>	SHA256(payment_basepoint from open_channel || payment_basepoint from accept_channel)
 
 This obscures the number of commitments made on the channel in the
 case of unilateral close, yet still provides a useful index for both

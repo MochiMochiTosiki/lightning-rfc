@@ -105,6 +105,8 @@ case of unilateral close, yet still provides a useful index for both
 nodes (who know the `payment_basepoint`s) to quickly find a revoked
 commitment transaction.
 
+> これにより、一方的なクローズの場合にチャネルで行われたコミットメントの数がわかりにくくなりますが、revoked commitment transaction を両ノードがすばやく見つけるための有用なインデックスを提供します（「payment_basepoint」を知っている）。
+
 ### Commitment Transaction Outputs
 
 To allow an opportunity for penalty transactions, in case of a revoked commitment transaction, all outputs that return funds to the owner of the commitment transaction (a.k.a. the "local node") must be delayed for `to_self_delay` blocks. This delay is done in a second-stage HTLC transaction (HTLC-success for HTLCs accepted by the local node, HTLC-timeout for HTLCs offered by the local node).
@@ -113,6 +115,15 @@ The reason for the separate transaction stage for HTLC outputs is so that HTLCs 
 Otherwise, the required minimum timeout on HTLCs is lengthened by this delay, causing longer timeouts for HTLCs traversing the network.
 
 The amounts for each output MUST be rounded down to whole satoshis. If this amount, minus the fees for the HTLC transaction, is less than the `dust_limit_satoshis` set by the owner of the commitment transaction, the output MUST NOT be produced (thus the funds add to fees).
+
+> revoked commitment の場合、penalty transactionsを許可するため、commitment transactionsのオーナー(ローカルノード)に資金を戻す全てのoutputsは`to_self_delay`blocks より遅れなくてはいけません。この遅延は第二段階の HTLC transaction で実行します(local node によって受け入れられた HTLC のHTLC-success、local node によって提供された HTLC の HTLC-timeout)
+
+
+> HTLC outputs の transaction stage が個別である理由は、HTLC が`to_self_delay`遅延内であってもタイムアウトができるようにするためです。そうでないとHTLCsに必要なタイムアウトはこの遅延によって長くなり、ネットワークを通過するHTLCsのタイムアウトが長くなります。
+
+
+> 各 output の金額は、全 satoshi 分切り捨てなければなりません。もしこの金額から HTLC transaction の手数料を引いた金額が commitment transaction のオーナーが設定した `dust_limit_satioshis` より少ない場合、 output を生成してはいけません（したがって資金は手数料に加算されます）.
+
 
 #### `to_local` Output
 

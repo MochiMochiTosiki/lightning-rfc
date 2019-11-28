@@ -129,6 +129,8 @@ The amounts for each output MUST be rounded down to whole satoshis. If this amou
 
 This output sends funds back to the owner of this commitment transaction and thus must be timelocked using `OP_CHECKSEQUENCEVERIFY`. It can be claimed, without delay, by the other party if they know the revocation private key. The output is a version-0 P2WSH, with a witness script:
 
+> この output は資金をこの commitment transaction の所有者に送り返すため、 `OP_CHECKSEQUENCEVERIFY`を使用してタイムロックする必要があります。revocation private key を知っている場合、相手は遅滞なく請求できます。output は、監視スクリプトを使用したバージョン0 P2WSHです。
+
     OP_IF
         # Penalty transaction
         <revocationpubkey>

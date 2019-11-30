@@ -144,9 +144,13 @@ This output sends funds back to the owner of this commitment transaction and thu
 
 The output is spent by a transaction with `nSequence` field set to `to_self_delay` (which can only be valid after that duration has passed) and witness:
 
+> output は、 `nSequence` フィールドが` to_self_delay`（その期間が経過した後にのみ有効になります）と監視に設定されたtransactionによって費やされます：
+
     <local_delayedsig> 0
 
 If a revoked commitment transaction is published, the other party can spend this output immediately with the following witness:
+
+> revoked commitment transaction が公開されると、相手は次の witness と一緒にこの output をすぐに使用できます。
 
     <revocation_sig> 1
 
@@ -154,9 +158,14 @@ If a revoked commitment transaction is published, the other party can spend this
 
 This output sends funds to the other peer and thus is a simple P2WPKH to `remotepubkey`.
 
+> この output は他のピアに資金を支払うため、`remotepubkey` に対する シンプルな P2WPKH です
+
 #### Offered HTLC Outputs
 
 This output sends funds to either an HTLC-timeout transaction after the HTLC-timeout or to the remote node using the payment preimage or the revocation key. The output is a P2WSH, with a witness script:
+
+> この output は HTLC-timout 後の HTLC-timeout transaction または、 payment preimage か revocation key を使ってremote node に資金を送ります。　その output は witness script を使用した P2WSH です.
+
 
     # To remote node with revocation key
     OP_DUP OP_HASH160 <RIPEMD160(SHA256(revocationpubkey))> OP_EQUAL

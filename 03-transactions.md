@@ -197,9 +197,13 @@ If a revoked commitment transaction is published, the remote node can spend this
 
 The sending node can use the HTLC-timeout transaction to timeout the HTLC once the HTLC is expired, as shown below. This is the only way that the local node can timeout the HTLC, and this branch requires `<remotehtlcsig>`, which ensures that the local node cannot prematurely timeout the HTLC since the HTLC-timeout transaction has `cltv_expiry` as its specified `locktime`. The local node must also wait `to_self_delay` before accessing these funds, allowing for the remote node to claim these funds if the transaction has been revoked.
 
+> 以下に示すように、swnding node は HTLC-timeout transaction を使用して、HTLC が期限切れになると HTLC を timeout できます。 これは、local node が HTLC を timeout できる唯一の方法であり、このブランチには `<remotehtlcsig>` が必要です。HTLC-timeout には指定された `locktime` として`cltv_expiry` があるため、local node が HTLC を早期に timeout できないようにします。 local node はこれらの資金にアクセスする前に `to_self_delay` 分待機する必要があり、transaction が取り消された場合に remote node がこれらの資金を請求できるようにします。
+
 #### Received HTLC Outputs
 
 This output sends funds to either the remote node after the HTLC-timeout or using the revocation key, or to an HTLC-success transaction with a successful payment preimage. The output is a P2WSH, with a witness script:
+
+> この output は HTLC-timout 後、または revocation key を使用してリモートノードに資金を送信するか、payment preimage が成功した HTLC-success transaction に資金を送信します。その output は witness script を使用した P2WSH です。
 
     # To remote node with revocation key
     OP_DUP OP_HASH160 <RIPEMD160(SHA256(revocationpubkey))> OP_EQUAL
@@ -220,13 +224,19 @@ This output sends funds to either the remote node after the HTLC-timeout or usin
 
 To timeout the HTLC, the remote node spends it with the witness:
 
+> HTLC をタイムアウトするために、remote node はそれを witness で使用します。
+
     <remotehtlcsig> 0
 
 If a revoked commitment transaction is published, the remote node can spend this output immediately with the following witness:
 
+> もし revoked commtiment transaction が公開されると、remote node は witness に従ってすぐにこの output を使用出来ます。
+
     <revocation_sig> <revocationpubkey>
 
 To redeem the HTLC, the HTLC-success transaction is used as detailed below. This is the only way that the local node can spend the HTLC, since this branch requires `<remotehtlcsig>`, which ensures that the local node must wait `to_self_delay` before accessing these funds allowing for the remote node to claim these funds if the transaction has been revoked.
+
+> HTLC を執行するため、HTLC-success transaction を使用して以下に詳細を示します。 これは、local node が HTLC を費やすことができる唯一の方法です。このブランチは `<remotehtlcsig>` が必要であるため、 local node はこれらの資金にアクセスする前に `to_self_delay` 分待機し、transaction が取り消された場合にremote node がこれらの資金を請求できるようにします。
 
 ### Trimmed Outputs
 

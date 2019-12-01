@@ -185,9 +185,13 @@ This output sends funds to either an HTLC-timeout transaction after the HTLC-tim
 
 The remote node can redeem the HTLC with the witness:
 
+> remote node は witness と一緒に HTLC を執行する事ができます：
+
     <remotehtlcsig> <payment_preimage>
 
 If a revoked commitment transaction is published, the remote node can spend this output immediately with the following witness:
+
+> もし revoked commtiment transaction が公開されると、remote node は witness に従ってすぐにこの output を使用出来ます。
 
     <revocation_sig> <revocationpubkey>
 

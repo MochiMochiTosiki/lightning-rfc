@@ -247,6 +247,8 @@ to the commitment transaction fee. For HTLCs, it needs to be taken into
 account that the second-stage HTLC transaction may also be below the
 limit.
 
+＞各ピアは、outputs を生成しない `dust_limit_satoshis` を指定します。 生成されないこれらの output は `trimmed` と呼ばれます。 trimmed output は小さすぎて作成する価値がないと見なされ、代わりに commitment transaction fee に追加されます。 HTLCの場合、第2段階の HTLC transaction も制限を下回る可能性があることを考慮する必要があります。
+
 #### Requirements
 
 The base fee:

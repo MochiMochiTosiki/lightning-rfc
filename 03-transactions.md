@@ -247,7 +247,7 @@ to the commitment transaction fee. For HTLCs, it needs to be taken into
 account that the second-stage HTLC transaction may also be below the
 limit.
 
-＞各ピアは、outputs を生成しない `dust_limit_satoshis` を指定します。 生成されないこれらの output は `trimmed` と呼ばれます。 trimmed output は小さすぎて作成する価値がないと見なされ、代わりに commitment transaction fee に追加されます。 HTLCの場合、第2段階の HTLC transaction も制限を下回る可能性があることを考慮する必要があります。
+> 各ピアは、outputs を生成しない `dust_limit_satoshis` を指定します。 生成されないこれらの output は `trimmed` と呼ばれます。 trimmed output は小さすぎて作成する価値がないと見なされ、代わりに commitment transaction fee に追加されます。 HTLCの場合、第2段階の HTLC transaction も制限を下回る可能性があることを考慮する必要があります。
 
 #### Requirements
 
@@ -255,6 +255,10 @@ The base fee:
   - before the commitment transaction outputs are determined:
     - MUST be subtracted from the `to_local` or `to_remote`
     outputs, as specified in [Fee Calculation](#fee-calculation).
+    
+> 基本手数料：
+>	- commitment transaction の確定前：
+>		- [Fee Calucation](#fee-calucation) で指定されているように、 `to_local` または `to_remote` output から減算する必要があります。
 
 The commitment transaction:
   - if the amount of the commitment transaction `to_local` output would be
@@ -281,6 +285,26 @@ less than `dust_limit_satoshis` set by the transaction owner:
     - otherwise:
       - MUST be generated as specified in
       [Received HTLC Outputs](#received-htlc-outputs).
+      
+> The commitment transaction：
+> 	- commitment transaction 'to_local' output の amount が transaction owner の設定した 'dust_limit_satoshi' より低かった場合：
+> 		- その output を含める事ができません
+> 	- そうでない場合：
+> 		- [`to_local` Output](#to_local-output)で指定されているように生成する必要があります
+>	- commitment transaction 'to_remote' output の amount が transaction owner の設定した 'dust_limit_satoshi' より低かった場合：
+> 		- その output を含める事ができません
+>  	- そうでない場合：
+> 		- [`to_remote` Output](#to_remote-output)で指定されているように生成する必要があります
+> 	- 全ての offerd HTLC について 
+> 		- HTLC amount から HTLC-success 手数料を引いた値が、transaction owner によって設定された `dust_limit_satoshis` よりも少ない場合：
+> 		- その output を含める事ができません
+> 	- そうでない場合：
+> 		- [Offerd HTLC Output](#offerd-htlc-outputs)で指定されているように生成する必要があります
+> 	- 全ての receuved HTLC について 
+> 		- HTLC amount から HTLC-success 手数料を引いた値が、transaction owner によって設定された `dust_limit_satoshis` よりも少ない場合：
+> 		- その output を含める事ができません
+> 	- そうでない場合：
+> 		- [Received HTLC Output](#received-htlc-outputs)で指定されているように生成する必要があります
 
 ## HTLC-Timeout and HTLC-Success Transactions
 

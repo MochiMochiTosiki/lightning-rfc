@@ -310,6 +310,8 @@ less than `dust_limit_satoshis` set by the transaction owner:
 
 These HTLC transactions are almost identical, except the HTLC-timeout transaction is timelocked. Both HTLC-timeout/HTLC-success transactions can be spent by a valid penalty transaction.
 
+> これらの HTLC transaction は、HTLC-timout transaction がタイムロックされることを除いてほとんど同じです。 HTLC-timeout / HTLC-success transactions は両方とも、有効な penalty transaction で使用できます。
+
 * version: 2
 * locktime: `0` for HTLC-success, `cltv_expiry` for HTLC-timeout
 * txin count: 1
@@ -336,9 +338,13 @@ The witness script for the output is:
 
 To spend this via penalty, the remote node uses a witness stack `<revocationsig> 1`, and to collect the output, the local node uses an input with nSequence `to_self_delay` and a witness stack `<local_delayedsig> 0`.
 
+> ペナルティを介してこれを過ごすために、remote node は監視スタック `<revocationsig> 1` を使用し、output を収集するために、local node は nSequence` to_self_delay`と witness stack `<local_delayedsig> 0` を使用します。
+
 ## Closing Transaction
 
 Note that there are two possible variants for each node.
+
+> 各ノードには2つのバリエーションがあることに注意してください。
 
 * version: 2
 * locktime: 0
@@ -358,6 +364,12 @@ Each node offering a signature:
   - MUST subtract the fee given by `fee_satoshis` from the output to the funder.
   - MUST remove any output below its own `dust_limit_satoshis`.
   - MAY eliminate its own output.
+  
+> 署名をする各ノード:
+ > - 各 output を 全 satoshi を切り捨てる必要があります。
+ > - 資金提供者への output から `fee_satoshis` によって与えられた手数料を差し引かなければなりません。 
+ > - それ自身の `dust_limit_satoshis`以下の output を削除しなければなりません。 
+ > - 独自の output を削除できます。
 
 ### Rationale
 

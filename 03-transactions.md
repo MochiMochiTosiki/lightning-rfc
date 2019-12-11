@@ -389,6 +389,8 @@ has been used.
 There will be at least one output, if the funding amount is greater
 than twice `dust_limit_satoshis`.
 
+> 一方のノードが他方の output が小さすぎて Bitcoin network （a.k.a "dust"）での伝播ができないと見なし、そのノードが代わりにその output を廃棄するには価値がありすぎると見なす場合、closing の際に修復不可能な違いが生じる可能性があります。 これが、両者が独自の `dust_limit_satoshis` を使用する理由であり、closing transaction がどのように見えるべきかについて意見が一致しない場合、結果は署名検証の失敗になる可能性があります。
+
 ## Fees
 
 ### Fee Calculation

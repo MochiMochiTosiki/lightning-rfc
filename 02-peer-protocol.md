@@ -589,6 +589,9 @@ Once both nodes have exchanged `funding_locked` (and optionally [`announcement_s
 Changes are sent in batches: one or more `update_` messages are sent before a
 `commitment_signed` message, as in the following diagram:
 
+> 両ノードが `funding_locked`（およびオプションで[` announcement_signatures`]（07-routing-gossip.md＃the-announcement_signatures-message））を交換したら、チャネルを使用してHased Time Locked Contracts を介して支払いを行うことができます。
+> 変更はバッチで送信されます：1つ以上の `update_`メッセージが送信される前に次の図のような「commitment_signed」メッセージ：
+
         +-------+                               +-------+
         |       |--(1)---- update_add_htlc ---->|       |
         |       |--(2)---- update_add_htlc ---->|       |
@@ -609,7 +612,10 @@ commitment transaction; the node only adds those updates to its own
 commitment transaction when the remote node acknowledges it has
 applied them via `revoke_and_ack`.
 
+> 直感に反して、これらの更新は*他のノードの* commitment transaction に適用されます。 remote node が `revoke_and_ack` を介して更新を適用したことを確認した場合、ノードはそれらの更新を自身の commitment transaction に追加するだけです。
+
 Thus each update traverses through the following states:
+> したがって、各更新は次の状態を通過します。
 
 1. pending on the receiver
 2. in the receiver's latest commitment transaction
@@ -618,11 +624,19 @@ Thus each update traverses through the following states:
 4. ... and in the sender's latest commitment transaction
 5. ... and the sender's previous commitment transaction has been revoked
 
+> 1. rediverが保留中
+> 2. reciver の最新の commitment transaction
+> 3. そして、reciver の以前の commitment transaction が取り消され、更新が sender で保留中です
+> 4. および sender の最新の commitment transaction
+> 5. そして、sender の以前の commitment transactoin を取り消し
 
 As the two nodes' updates are independent, the two commitment
 transactions may be out of sync indefinitely. This is not concerning:
 what matters is whether both sides have irrevocably committed to a
 particular update or not (the final state, above).
+
+> 2つのノードの更新は独立しているため、2つの commitment transaciton がいつまでも同期されない場合があります。 これは関係ありません：　重要なのは、双方が irreveocably committed を持ち、特定の更新ができるかどうかです（上記の最終状態）。
+
 
 ### Forwarding HTLCs
 

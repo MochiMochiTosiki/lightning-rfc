@@ -752,6 +752,12 @@ incoming HTLC resolution can be derived, given a few assumptions:
 * a number of blocks `S` between transaction broadcast and the
   transaction being included in a block
 
+> いくつかの仮定が与えられた場合、送った HTLC 受け取った HTLC の間のブロックの最悪ケース数を導き出すことができます。
+
+> * 最悪の場合の再編成の深さ `R` ブロック
+> * 猶予期間 `G` は、HTLC timeout 後、応答しないピアをあきらめて chain に展開する前にブロックします
+> * transaction broadcast　とブロックに含まれるトランザクションとの間の多数のブロック `S` 
+
 The worst case is for a forwarding node (B) that takes the longest
 possible time to spot the outgoing HTLC fulfillment and also takes
 the longest possible time to redeem it on-chain:
@@ -775,6 +781,16 @@ the longest possible time to redeem it on-chain:
    otherwise another reorganization could allow A to timeout the
    transaction.
 
+> 最悪の場合は、転送ノード（B）が HTLC 実行を見つけるのに可能な限り長い時間を要し、on-chain 上でそれを引き換えるのに可能な限り長い時間を要する場合です。
+
+> 1. B-> C HTLCはブロック `N` でタイムアウトし、BはCが待機を放棄するまで `G` ブロックを待機します。BまたはCは blockchain へ展開し、Bは `S` ブロック含むHTLCを使用します。
+> 2. 悪いケース： Cは（ちょうど）レースに勝ち、HTLCを実行します。Bはブロック `N + G + S + 1` を検出したときにのみそのトランザクションを参照します。
+> 3. 最悪の場合： Cが勝ち、実現する再編成 `R` があります。 Bは `N + G + S + R` のトランザクションのみを見ます。
+> 4. B は A -> B HTLCを実行する必要がありますが、Aは応答しません。Bは A を待つことをあきらめる前に、さらに `G` ブロック待機します。AまたはBがブロックチェーンに展開します。
+> 5. 悪いケース： BはAの commitment transaction をブロック `N + G + S + R + G + 1` で認識し、HTLC output を費やさなければなりません。
+> 6. 最悪の場合： Aが commitment transaction を費やすために使用する別の再編成 `R` があり、BはAの commitment transaction をブロック `N + G + S + R + G + R` で確認し、HTLC出力を費やすこれは、マイニングされる `S` ブロックを取ります。
+> 7. Bの HTLC output は、タイムアウトする前に少なくとも `R` の深さである必要があります。そうでない場合、別の再編成により A が transaction をタイムアウトする可能性があります。
+
 Thus, the worst case is `3R+2G+2S`, assuming `R` is at least 1. Note that the
 chances of three reorganizations in which the other node wins all of them is
 low for `R` of 2 or more. Since high fees are used (and HTLC spends can use
@@ -783,6 +799,8 @@ irregular and empty blocks still occur, `S=2` should be considered a
 minimum. Similarly, the grace period `G` can be low (1 or 2), as nodes are
 required to timeout or fulfill as soon as possible; but if `G` is too low it increases the
 risk of unnecessary channel closure due to networking delays.
+
+> したがって、最悪の場合は `3R + 2G + 2S` であり、`R` が少なくとも1であると仮定すると、`R` が2以上の場合、他のノードがすべてを勝ち取る3つの再編成の可能性は低くなります。 高い手数料が使用されるため（HTLCの支出にはほぼ任意の手数料を使用できるため）、`S` は小さくする必要があります。 ただし、block time が不規則で空のブロックが引き続き発生する場合、 `S = 2` を最小と見なす必要があります。 同様に、ノードはできるだけ早くタイムアウトするか実行する必要があるため、猶予期間 `G`は短くすることができます（1または2）。 しかし、`G` が低すぎると、ネットワーク遅延により不必要なチャネルが閉じられるリスクが高くなります。
 
 There are four values that need be derived:
 
@@ -804,6 +822,16 @@ the channel has to be failed and the HTLC fulfilled on-chain before its
    [BOLT #11](11-payment-encoding.md) is 9, which is slightly more
    conservative than the 7 that this calculation suggests.
 
+> 導出する必要がある4つの値があります。
+
+> 1. チャネルの `cltv_expiry_delta`、`3R + 2G + 2S`： 疑わしい場合は、12の `cltv_expiry_delta` が妥当です（R = 2、G = 1、S = 2）。
+
+> 2. 提供される HTLC の期限： チャネルが失敗し、on-chain 上でタイムアウトするまでの期限。 これは、HTLC の `cltv_expiry` の後の `G` ブロックです。1ブロックが妥当です。
+
+> 3. このノードが実行したHTLCの期限： チャネルが失敗し、HTLCが `cltv_expiry` の前にon-chain上で実行しなければならない期限。 上記の手順4〜7を参照してください。これは、`cltv_expiry` の前に `2R+G+S` ブロックの期限を意味します。7ブロックが妥当です。
+
+> 4. 末端の支払いに受け入れられる最小の `cltv_expiry`： 末端ノード C の最悪のケースは `2R + G + S` ブロックです（これも上記の手順1〜3は適用されません）。 [BOLT＃11]（11-payment-encoding.md）のデフォルトは9です。これは、この計算が示唆する7よりわずかに控えめです。
+
 #### Requirements
 
 An offering node:
@@ -813,6 +841,12 @@ An offering node:
   commitment transaction, AND is past this timeout deadline:
     - MUST fail the channel.
 
+> offering node：
+>   - 提供する各 HTLC のタイムアウト期限を推定する必要があります。
+>   - `cltv_expiry` の前にタイムアウト期限を設定した HTLC を提供してはなりません。
+>   - 提供した HTLC がいずれかのノードの現在の commitment transaction にあり、かつこのタイムアウト期限を過ぎている場合：
+>     - チャネルに失敗する必要があります。
+
 A fulfilling node:
   - for each HTLC it is attempting to fulfill:
     - MUST estimate a fulfillment deadline.
@@ -820,6 +854,13 @@ A fulfilling node:
   - if an HTLC it has fulfilled is in either node's current commitment
   transaction, AND is past this fulfillment deadline:
     - MUST fail the channel.
+
+> fulfilling node:
+>   - HTLCごとに、以下を実現しようとしています。
+>     - 履行期限を見積もる必要があります。
+>   - 履行期限がすでに過ぎている HTLC に失敗する（転送しない）必要があります。
+>   - 履行した HTLC がいずれかのノードの現在の commitment transaction にあり、この履行期限を過ぎている場合：
+>     -チャネルに失敗する必要があります。
 
 ### Adding an HTLC: `update_add_htlc`
 
@@ -831,6 +872,10 @@ specified in [BOLT #3](03-transactions.md)).
 
 The format of the `onion_routing_packet` portion, which indicates where the payment
 is destined, is described in [BOLT #4](04-onion-routing.md).
+
+> どちらのノードも `update_add_htlc」` 送信して、もう一方に HTLC を提供できます。これは、preimage と引き換えに利用できます。 量は millisatoshi 単位ですが、on-chain上での執行は、全体の satoshi がダスト制限を超える場合のみ可能です（ commitment transaction では、これらは[BOLT＃3]（03-transactions.md）で指定されているように切り捨てられます）。
+
+> 支払いの宛先を示す `onion_routing_packet` 部分の形式は、[BOLT＃4]（04-onion-routing.md）で説明されています。
 
 1. type: 128 (`update_add_htlc`)
 2. data:
@@ -865,6 +910,24 @@ Fees") while maintaining its channel reserve.
 `id` MUST NOT be reset to 0 after the update is complete (i.e. after `revoke_and_ack` has
 been received). It MUST continue incrementing instead.
 
+> sending node:
+>   - 現在の `feerate_per_kw`での remote commitment transaction で支払うことができない `amount_msat` を提供してはいけません（"Updating
+Fees"を参照）。
+>   - 0より大きい `amount_msat` を提供する必要があります。
+>   - 受信ノードの `htlc_minimum_msat` の下に `amount_msat` を提供してはなりません
+>   - `cltv_expiry` を 500000000未満に設定する必要があります。
+>   - Bitcoin blockchain を識別する `chain_hash` を持つチャネルの場合：
+>     - `amount_msat` の上位4バイトを0に設定しなければなりません。
+>   - 結果が remote commitment transaction で、リモートの `max_accepted_htlcs` HTLC より多くを提供する場合：
+>     - HTLCを追加しないでください。
+>   - offerd HTLC の合計がリモートの `max_htlc_value_in_flight_msat` を超える場合：
+>     - HTLCを追加しないでください。
+>   - 最初の HTLC の場合：
+>     -`id`を0に設定する必要があります。
+>   - 連続するオファーごとに `id` の値を1ずつ増やす必要があります。
+
+> 更新が完了した後（つまり、`revoke_and_ack` を受信した後）、`id` を 0 にリセットしてはなりません。代わりにそれを増やし続けなければなりません。
+
 A receiving node:
   - receiving an `amount_msat` equal to 0, OR less than its own `htlc_minimum_msat`:
     - SHOULD fail the channel.
@@ -883,9 +946,28 @@ A receiving node:
   - if other `id` violations occur:
     - MAY fail the channel.
 
+> receiving node:
+>   - 0に等しい、または自身が設定した `htlc_minimum_msat` より小さい` amount_msat`を受信した場合：
+>     - チャネルに失敗する必要があります。
+>   - sending node が現在の `feerate_per_kw` で余裕がない `amount_msat` を受信した場合（チャネル予約を維持します）：
+>     - チャネルに失敗する必要があります。
+>   - sending node が受信側の `max_accepted_htlcs` HTLCを local commitment transaction に追加する場合、または受信側の `max_htlc_value_in_flight_msat` 相当以上の HTLC を local commitment transaction 追加する場合：
+>     - チャネルに失敗する必要があります。
+>   - sending node が `cltv_expiry` を500000000以上に設定する場合：
+>     - チャネルに失敗する必要があります。
+>   - Bitcoin blockchain を識別する `chain_hash` を持つチャネルの場合、 `amount_msat` の最上位4バイトが0でない場合：
+>     - チャネルに失敗する必要があります。
+>   - 同じ `payment_hash` を持つ複数のHTLCを許可する必要があります。
+>   - 送信者が以前にその HTLC の実行を確認しなかった場合：
+>     - 再接続後に繰り返される `id` 値を無視する必要があります。
+>   - 他の `id` 違反が発生した場合：
+>     - チャネルが失敗する場合があります。
+
 The `onion_routing_packet` contains an obfuscated list of hops and instructions for each hop along the path.
 It commits to the HTLC by setting the `payment_hash` as associated data, i.e. includes the `payment_hash` in the computation of HMACs.
 This prevents replay attacks that would reuse a previous `onion_routing_packet` with a different `payment_hash`.
+
+> `onion_routing_packet` には、難読化されたホップのリストと、パスに沿った各ホップの指示が含まれています。 関連するデータとして `payment_hash` を設定することで HTLC にコミットします。つまり、HMAC の計算に `payment_hash` を含めます。 これにより、以前の `onion_routing_packet` を別の `payment_hash`で再利用するリプレイ攻撃を防ぎます。
 
 #### Rationale
 
@@ -912,6 +994,18 @@ seconds, and the protocol only supports an expiry in blocks.
 `amount_msat` is deliberately limited for this version of the
 specification; larger amounts are not necessary, nor wise, during the
 bootstrap phase of the network.
+
+> 無効な金額は明確なプロトコル違反であり、故障を示しています。
+
+> ノードが同じ支払いハッシュを持つ複数の HTLC を受け入れなかった場合、攻撃者はノードに既存の HTLC があるかどうかを調べることができます。重複を処理するためのこの要件は、個別の識別子の使用につながります。 64ビットカウンターがラップしないことを前提としています。
+
+> 未接続の更新の再送信は、再接続の目的で明示的に許可されます。他のときにそれらを許可すると、受信者コードが簡素化されます（ただし、厳密なチェックがデバッグに役立つ場合があります）。
+
+> `max_accepted_htlcs` は 483 に制限されており、双方が最大数の HTLC を送信した場合でも、`commitment_signed` メッセージは最大メッセージサイズ未満のままです。また、[BOLT＃5]（05-onchain.md＃penalty-transaction-weight-calculation）で計算されているように、単一の penalty transaction が commitment transaction 全体を使用できるようにします。
+
+> 500000000以上の `cltv_expiry` 値は秒単位の時間を示し、プロトコルはブロック単位の有効期限のみをサポートします。
+
+> このバージョンの仕様では、`amount_msat` は意図的に制限されています。ネットワークのブートストラップ段階では、これ以上の量は必要ありませんし、賢明でもありません。
 
 ### Removing an HTLC: `update_fulfill_htlc`, `update_fail_htlc`, and `update_fail_malformed_htlc`
 

@@ -674,6 +674,16 @@ to that outgoing HTLC.
     - SHOULD fail that incoming HTLC (`update_fail_htlc`).
   - upon receiving an `update_fulfill_htlc` for an outgoing HTLC, OR upon discovering the `payment_preimage` from an on-chain HTLC spend:
     - MUST fulfill the incoming HTLC that corresponds to that outgoing HTLC.
+    
+> A node:
+>   - HTLC が来て取り消し不可能になるまで：
+>     - その HTLCに対応して、対応する HTLC（ `update_add_htlc`）を提供してはなりません。
+>   - HTLC の削除が取り消し不能になる、または on-chain HTLC output が HTLC-timeout transaction を介して消費されるまで（十分な深さで）：
+>     - その HTLC に対応する HTLC（ `update_fail_htlc`）を失敗させてはいけません。
+>   - HTLC の 'cltv_expiry' が不当に遠い場合：
+>     - HTLC (`update_fail_htlc`) を失敗する必要があります。
+>   - HTLCの `update_fulfill_htlc` を受信したとき、または on-chain の HTLC の支出から `payment_preimage` を発見したとき
+>     - その HTLC に対応する HTLC を満たさなければなりません。
 
 #### Rationale
 
@@ -686,6 +696,11 @@ An HTLC with an unreasonably long expiry is a denial-of-service vector and
 therefore is not allowed. Note that the exact value of "unreasonable" is currently unclear
 and may depend on network topology.
 
+> 一般的に、交換の一方は他方の前に対処する必要があります。
+> HTLCの実現は異なります: 定義により、preimage の情報は取消不能であり、遅延を減らすために HTLC をできるだけ早く満たす必要があります。
+
+> 有効期限が不当に長い HTLC はサービス拒否ベクトルであるため、許可されません。 `unreasonable` の正確な値は現在不明であり、ネットワークトポロジに依存する可能性があることに注意してください。
+
 ### `cltv_expiry_delta` Selection
 
 Once an HTLC has timed out, it can either be fulfilled or timed-out;
@@ -695,6 +710,10 @@ Consider the following scenario, where A sends an HTLC to B, who
 forwards to C, who delivers the goods as soon as the payment is
 received.
 
+> HTLC がタイムアウトになったら、それを実行するか タイムアウト にすることができます。 提供された HTLC と受信された HTLC の両方について、この移行に注意する必要があります。
+
+> A が HTLC を B に送信し C に転送する次のシナリオを考えます。Cは、支払いが完了するとすぐに商品を配達します
+
 1. C needs to be sure that the HTLC from B cannot time out, even if B becomes
    unresponsive; i.e. C can fulfill the incoming HTLC on-chain before B can
    time it out on-chain.
@@ -702,6 +721,10 @@ received.
 2. B needs to be sure that if C fulfills the HTLC from B, it can fulfill the
    incoming HTLC from A; i.e. B can get the preimage from C and fulfill the incoming
    HTLC on-chain before A can time it out on-chain.
+   
+> 1. C は、B が応答しなくなっても、B からの HTLC がタイムアウトにならないことを確認する必要があります。 つまり、C　は　HTLC　を on-chain で満たす前に、Bは on-chain でタイムアウトすることができます。
+> 2. B は、C が B からの HTLC を実行する場合、A からの HTLC を実行できることを確認する必要があります。 つまり、A が on-chain 上でタイムアウトする前に、B は C から preimage を取得し、HTLC を on-chain で実行できます。
+
 
 The critical settings here are the `cltv_expiry_delta` in
 [BOLT #7](07-routing-gossip.md#the-channel_update-message) and the
@@ -715,6 +738,10 @@ Note that a node is at risk if it accepts an HTLC in one channel and
 offers an HTLC in another channel with too small of a difference between
 the CLTV timeouts.  For this reason, the `cltv_expiry_delta` for the
 *outgoing* channel is used as the delta across a node.
+
+> ここでの重要な設定は、[BOLT＃7]（07-routing-gossip.md＃the-channel_update-message）に関連する `cltv_expiry_delta` および[BOLT＃11]（11-payment-encoding.md＃tagged-fields）に関連する `min_final_cltv_expiry` です。 `cltv_expiry_delta`は、転送の場合の HTLC CLTV timeoutsの最小差です（B）。 `min_final_cltv_expiry`は、HTLC CLTV timeoutと最新ブロックの高さとの最小の差です（端末の場合）（C）。
+
+> 1つのチャネルで HTLC を受け入れ、CLTV timeouts の差が小さい別チャネルで HTLCを提供する場合、ノードが危険にさらされることに注意してください。 このため、* outgoing *チャネルの `cltv_expiry_delta`はノード全体の差分として使用されます。
 
 The worst-case number of blocks between outgoing and
 incoming HTLC resolution can be derived, given a few assumptions:

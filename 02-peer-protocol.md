@@ -652,6 +652,14 @@ previous commitment transaction **without/with** it has been revoked, OR
 2. The commitment transaction **with/without** it has been irreversibly committed to
 the blockchain.
 
+> 一般的に、ノードは2つの理由でHTLCを提供します。それは、独自の支払いを開始するため、または別のノードの支払いを転送するためです。 転送の場合、*着信* HTLCを引き換えられない限り、*発信* HTLCが引き換えられないように注意する必要があります。 次の要件により、これが常に真になることが保証されます。
+
+> HTLCのそれぞれの**追加/削除**は、次の場合に*irrebersibly comitted*と見なされます
+
+> 1.両ノードによってコミットされる**あり/なし**のcommitment transaction、および**取り消される以前の commitment transaction**
+
+> 2.ブロックチェーンに展開された commitment transaction **あり/なし**
+
 #### Requirements
 
 A node:

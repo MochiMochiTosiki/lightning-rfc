@@ -1013,6 +1013,8 @@ For simplicity, a node can only remove HTLCs added by the other node.
 There are four reasons for removing an HTLC: the payment preimage is supplied,
 it has timed out, it has failed to route, or it is malformed.
 
+> 簡単にするために、ノードは他のノードによって追加された HTLC のみを削除できます。 HTLCを削除する理由は4つあります。preimage が提供された、タイムアウトした、ルーティングに失敗した、または不正な形式の4つです。
+
 To supply the preimage:
 
 1. type: 130 (`update_fulfill_htlc`)
@@ -1036,6 +1038,9 @@ however, there's a special malformed failure variant for the case where
 the peer couldn't parse it: in this case the current node instead takes action, encrypting
 it into a `update_fail_htlc` for relaying.
 
+> `reason` フィールドは、[BOLT＃4]（04-onion-routing.md）で定義されているように、元の　HTLC 作成者の利益のために不透明な暗号化されたblobです。 しかし、ピアがそれを解析できなかった場合のために、特別な不正な形式の障害バリアントがあります。この場合、現在のノードは代わりにアクションを実行し、中継のために `update_fail_htlc` に暗号化します。
+
+
 For an unparsable HTLC:
 
 1. type: 135 (`update_fail_malformed_htlc`)
@@ -1055,6 +1060,12 @@ A node:
     - MUST NOT send an `update_fulfill_htlc`, `update_fail_htlc`, or
 `update_fail_malformed_htlc`.
 
+> node:
+>   - できるだけ早く HTLC を削除する必要があります。
+>   - タイムアウトした HTLC に失敗する必要があります。
+>   - 対応する HTLC が両サイドの commitment transactions で irrevocably committed されるまで：
+>     - `update_fulfill_htlc`, `update_fail_htlc`、または `update_fail_malformed_htlc` を送信してはいけません。
+
 A receiving node:
   - if the `id` does not correspond to an HTLC in its current commitment transaction:
     - MUST fail the channel.
@@ -1071,6 +1082,18 @@ A receiving node:
     - MUST return an error in the `update_fail_htlc` sent to the link which
       originally sent the HTLC, using the `failure_code` given and setting the
       data to `sha256_of_onion`.
+
+> receiving node:
+>   - `id` が現在の commitment transaction の HTLC に対応しない場合：
+>     - チャネルに失敗する必要があります。
+>     - `update_fulfill_htlc` の `payment_preimage`値が、対応するHTLC `payment_hash` にSHA256 しない場合：
+>       - チャネルに失敗する必要があります。
+>     - `update_fail_malformed_htlc` に `failure_code` の `BADONION` bit が設定されていない場合：
+>       - チャネルに失敗する必要があります。
+>     - `update_fail_malformed_htlc` の `sha256_of_onion` が送信した onion と一致しない場合：
+>       - 再試行するか、代替エラー応答を選択することができます。
+>     - それ以外の場合、`update_fail_malformed_htlc` によってキャンセルされた発信HTLCを持つ受信ノード：
+>     - 指定された `failure_code` を使用してデータを `sha256_of_onion` に設定し、HTLC を最初に送信したリンクに送信された `update_fail_htlc` でエラーを返さなければなりません。
 
 #### Rationale
 
@@ -1089,6 +1112,14 @@ does match the onion it sent, which may allow it to detect random bit
 errors. However, without re-checking the actual encrypted packet sent,
 it won't know whether the error was its own or the remote's; so
 such detection is left as an option.
+
+> HTLC をタイムアウトしないノードは、チャネル障害のリスクがあります（[`cltv_expiry_delta`選択]（＃cltv_expiry_delta-selection）を参照）。
+
+> sender の前に `update_fulfill_htlc` を送信するノードも HTLC が実行され、資金を失うリスクがあります。
+
+> onion の形式が正しくない場合、上流ノードは共有キーを抽出して応答を生成できません。そのため、このノードが実行する特別な失敗メッセージです。
+
+> ノードは、上流が不満を言う SHA256が 送信した onion と一致することを確認できます。これにより、ランダムビットエラーを検出できる場合があります。 ただし、送信された実際の暗号化されたパケットを再チェックしないと、エラーがそれ自身のものであるかリモートのものであるかがわかりません。 そのため、このような検出はオプションとして残されています。
 
 ### Committing Updates So Far: `commitment_signed`
 

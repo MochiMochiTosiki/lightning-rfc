@@ -8,6 +8,8 @@ which describes the current state of the channel (basically, the current balance
 This *commitment transaction* is updated every time a new payment is made and
 is spendable at all times.
 
+> Lightning では、2つのパーティ（ローカルノードとリモートノード）が、各パーティにチャネルの現在の状態（基本的には現在のバランス）を記述する *cross-signed commitment transaction* を与えることにより、off-chain でトランザクションを実行できます。。 この*commitment transaction*は、新しい支払いが行われるたびに更新され、常に使用可能です。
+
 There are three ways a channel can end:
 
 1. The good way (*mutual close*): at some point the local and remote nodes agree

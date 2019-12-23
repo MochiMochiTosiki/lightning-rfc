@@ -23,6 +23,11 @@ publishes its *latest commitment transaction*.
 tries to cheat, by publishing an *outdated commitment transaction* (presumably,
 a prior version, which is more in its favor).
 
+> チャネルを終了するには3つの方法があります：
+> 1. The good way（*mutual close*）： ある時点で、local と remote node はチャネルを閉じることに同意します。 彼らは *closing transaction* （commitment transaction に似ていますが、保留中の支払いはありません）を生成し、ブロックチェーンで公開します（[BOLT＃2：Channel Close]（02-peer-protocol.md＃channel-closeを参照） ））。
+> 2. The bad way（*unilateral close*）： 何かがおかしくなり、おそらくどちらかの側に悪意がない。 たとえば、ある当事者がクラッシュした可能性があります。 一方は、*latest commitment transaction* を公開します。
+> 3. The ugly way（*revoked transaction close*）： パーティの1つが、*outdated commitment transaction* （おそらく、以前のバージョンのほうが有利です）を公開することにより、意図的に不正を試みます。
+
 Because Lightning is designed to be trustless, there is no risk of loss of funds
 in any of these three cases; provided that the situation is properly handled.
 The goal of this document is to explain exactly how a node should react when it

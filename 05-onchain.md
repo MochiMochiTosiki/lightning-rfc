@@ -33,6 +33,8 @@ in any of these three cases; provided that the situation is properly handled.
 The goal of this document is to explain exactly how a node should react when it
 encounters any of the above situations, on-chain.
 
+> Lightningは trustless に設計されているため、これら3つのケースのいずれにおいて適切に処理されていれば資金を失うリスクはありません。 このドキュメントの目標は、ノードが on-chain で上記の状況のいずれかに遭遇したときのノードの反応を正確に説明することです。
+
 # Table of Contents
   * [General Nomenclature](#general-nomenclature)
   * [Commitment Transaction](#commitment-transaction)
@@ -66,6 +68,10 @@ once the remote's *resolving* transaction is included in a block at least 100
 deep, on the most-work blockchain. 100 blocks is far greater than the
 longest known Bitcoin fork and is the same wait time used for
 confirmations of miners' rewards (see [Reference Implementation](https://github.com/bitcoin/bitcoin/blob/4db82b7aab4ad64717f742a7318e3dc6811b41be/src/consensus/tx_verify.cpp#L223)).
+
+> 未使用の outputs は、*unresolved* とみなされ、このドキュメントで詳しく説明されているように *resolved* できます。 通常、これは別の *resolving* transaction で使用することで達成されます。 ただし、後のウォレット支出のために単に output を記録するだけで十分な場合もありますが、その場合、output を含むtransaciton は独自の*resolving* transactionと見なされます。
+
+> remote's *resolving* transaction が最も作業しているブロックチェーンで少なくとも100の深さのブロックに含まれると、*resolved* output は *irrevocably resolved* と見なされます。 100ブロックは、既知の最長のビットコインフォークよりもはるかに大きく、マイナー報酬の確認に使用されるのと同じ待機時間です。
 
 ## Requirements
 

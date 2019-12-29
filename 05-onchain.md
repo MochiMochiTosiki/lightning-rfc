@@ -141,6 +141,13 @@ consequence, the two commitment transactions are not identical, but they are
 See [BOLT #3: Commitment Transaction](03-transactions.md#commitment-transaction)
 for more details.
 
+> ローカルノードとリモートノードはそれぞれ *commitment transaction* を保持しています。 これらの commitment transactions には、それぞれ4種類の出力があります。
+
+> 1. _ローカルノードの main output_： *local node's* commitment pubkey に支払うゼロまたは1つのoutput。
+> 2. _remoteノードの main output_： *remote node's* commitment pubkey に支払うためのゼロまたは1つのoutput。
+> 3. _local node's offered HTLCs_： payment preimage と引き換えに*リモートノード*に支払うためのゼロ以上の保留中の支払（* HTLCs *）。
+> 4. _remote node's offered HTLCs_： payment preimage と引き換えに*ローカルノード*に支払うための、ゼロ以上の保留中の支払（* HTLCs）。
+
 # Failing a Channel
 
 Although closing a channel can be accomplished in several ways, the most

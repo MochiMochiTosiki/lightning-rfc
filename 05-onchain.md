@@ -141,12 +141,17 @@ consequence, the two commitment transactions are not identical, but they are
 See [BOLT #3: Commitment Transaction](03-transactions.md#commitment-transaction)
 for more details.
 
-> ローカルノードとリモートノードはそれぞれ *commitment transaction* を保持しています。 これらの commitment transactions には、それぞれ4種類の出力があります。
+> ローカルノードとリモートノードはそれぞれ *commitment transaction* を保持しています。 これらの commitment transactions には、それぞれ4種類の出力があります。 
 
 > 1. _ローカルノードの main output_： *local node's* commitment pubkey に支払うゼロまたは1つのoutput。
 > 2. _remoteノードの main output_： *remote node's* commitment pubkey に支払うためのゼロまたは1つのoutput。
 > 3. _local node's offered HTLCs_： payment preimage と引き換えに*リモートノード*に支払うためのゼロ以上の保留中の支払（* HTLCs *）。
 > 4. _remote node's offered HTLCs_： payment preimage と引き換えに*ローカルノード*に支払うための、ゼロ以上の保留中の支払（* HTLCs）。
+
+> ローカルノードとリモートノードの協力を促すため、 `OP_CHECKSEQUENCEVERIFY` relative timeout は、*local node's outputs* （*local node's
+commitment transaction*）と *remote node's outputs* (in the *remote node's commitment transaction*) を妨げます 。 たとえば、ローカルノードがcommitment transaction を発行する場合、リモートノードは自身の資金にすぐにアクセスできるのに対し、ローカルノードは自身の資金を要求するのを待つ必要があります。 結果として、2つの commitment transactions は同一ではありませんが、（通常）対称的です。
+
+> 詳細は [BOLT #3: Commitment Transaction](03-transactions.md#commitment-transaction) を見てください。
 
 # Failing a Channel
 
@@ -156,6 +161,10 @@ efficient is preferred.
 Various error cases involve closing a channel. The requirements for sending
 error messages to peers are specified in
 [BOLT #1: The `error` Message](01-messaging.md#the-error-message).
+
+> チャネルを閉じるにはいくつかの方法がありますが、最も効率的な方法が推奨されます。
+
+> さまざまなエラーの場合には、チャネルを閉じる必要があります。 ピアにエラーメッセージを送信するための要件は、[BOLT＃1：The `error`メッセージ]（01-messaging.md＃the-error-message）で指定されています。
 
 ## Requirements
 
@@ -177,6 +186,22 @@ A node:
         - MUST use the *last commitment transaction*, for which it has a
         signature, to perform a *unilateral close*.
 
+> A node：
+>   - *local commitment transaction* に `to_local`または HTLC outputが含まれていない場合：
+>     - 単にチャンネルを忘れることがあります。
+>   - さもないと：
+>     - *current commitment transaction* に `to_local`または他の HTLC output が含まれていない場合：
+>       - リモートノードがチャネルを閉じるのを単に待つことができます。
+>       - リモートノードが閉じるまで：
+>         - チャンネルを忘れてはいけません。
+>     - さもないと：
+>       - `closing_signed`を含む有効なメッセージを受信した場合
+>       十分な料金：
+>         - この手数料を使用して、 *mutual close* を実行する必要があります。
+>       - さもないと：
+>         - *last commitment transaction* を使用しなければなりません。
+>         署名、*unilateral close*を実行します。
+
 ## Rationale
 
 Since `dust_limit_satoshis` is supposed to prevent creation of uneconomic
@@ -193,6 +218,12 @@ spendable by wallets. In addition, mutual close fees tend to be less exaggerated
 than those of commitment transactions. So, the only reason not to use the
 signature from `closing_signed` would be if the fee offered was too small for
 it to be processed.
+
+> `dust_limit_satoshis` は不経済な outputs （そうでなければ永久にブロックチェーンに費やされないままになる）の作成を防ぐことになっているため、すべての commitment transaction outputs を使用する必要があります。
+
+> チャンネルの初期段階では、一方の側がチャンネルにほとんど、またはまったく資金を持たないことが一般的です。 この場合、何も問題がないため、ノードはチャネル状態を監視するリソースを消費する必要はありません。
+
+> 前者の outputs は遅延によって妨げられず、ウォレットによって直接支出されるため、一方的なクローズよりも相互クローズを優先する傾向があります。 さらに、相互成約手数料は、 commitment transactions の手数料よりも誇張されない傾向があります。 したがって、`closing_signed` の署名を使用しない唯一の理由は、提供される料金が少なすぎて処理できない場合です。
 
 # Mutual Close Handling
 

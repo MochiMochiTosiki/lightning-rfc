@@ -233,6 +233,10 @@ In the case of a mutual close, a node need not do anything else, as it has
 already agreed to the output, which is sent to its specified `scriptpubkey` (see
 [BOLT #2: Closing initiation: `shutdown`](02-peer-protocol.md#closing-initiation-shutdown)).
 
+> closing transaction は、funding transaction output を `解決` します。
+
+> 相互クローズの場合、ノードは、指定された `scriptpubkey` に送信される output に既に同意しているため、他に何もする必要はありません（[BOLT＃2：終了開始：` shutdown`]（02 -peer-protocol.md＃closing-initiation-shutdown））。
+
 # Unilateral Close Handling: Local Commitment Transaction
 
 This is the first of two cases involving unilateral closes. In this case, a
@@ -243,6 +247,11 @@ However, a node cannot claim funds from the outputs of a unilateral close that
 it initiated, until the `OP_CHECKSEQUENCEVERIFY` delay has passed (as specified
 by the remote node's `to_self_delay` field). Where relevant, this situation is
 noted below.
+
+> これは、片側閉鎖を伴う2つのケースの最初のケースです。 この場合、ノードはその *local commitment transaction* を発見し、これが funding
+transaction output を *解決* します。
+
+> ただし、ノードは、`OP_CHECKSEQUENCEVERIFY` 遅延が経過するまで（リモートノードの `to_self_delay` フィールドで指定される）、開始した一方的な終値の出力から資金を請求することはできません。 関連する場合、この状況を以下に示します。
 
 ## Requirements
 
@@ -263,6 +272,16 @@ A node:
     - MUST handle HTLCs offered by the remote node as
     specified in [HTLC Output Handling: Local Commitment, Remote Offers](#htlc-output-handling-local-commitment-remote-offers).
 
+> A node:
+>   - *local commitment transaction* の発見時：
+>     - `to_local` output を便利なアドレスに費やす必要があります。
+>     - output を消費する前に、（`OP_CHECKSEQUENCEVERIFY` 遅延（リモートノードの `to_self_delay`フィールドで指定）が経過するまで待機する必要があります。
+>       - 注： output が（推奨されるように）費やされる場合、output は spending transaction によって*解決*されます。それ以外の場合、 commitment transaction 自体によって*解決*と見なされます。
+>     - `to_remote` outpput を無視してもよい。
+>       - 注： `to_remote` は commitment transaction 自体によって*解決*されていると見なされるため、ローカルノードによるアクションは不要です。
+>     - [HTLC Output Handling：Local Commitment、Local Offers]（＃htlc output-handling-local-commitment-local-offers）で指定されているように、それ自体が提供するHTLCを処理する必要があります。
+>     - [HTLC Output Handling：Local Commitment、Remote Offers]（＃htlc-output-handling-local-commitment-remote-offers）で指定されているように、リモートノードによって提供されるHTLCを処理する必要があります。
+
 ## Rationale
 
 Spending the `to_local` output avoids having to remember the complicated
@@ -271,6 +290,10 @@ spending.
 
 The `to_remote` output is entirely the business of the remote node, and
 can be ignored.
+
+> `to_local` output を使用することで、後で特定のチャネルに関連付けられた複雑な監視スクリプトを覚えておく必要がなくなります。
+
+> `to_remote` output は完全にリモートノードのビジネスであり、無視できます。
 
 ## HTLC Output Handling: Local Commitment, Local Offers
 

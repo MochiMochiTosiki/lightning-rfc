@@ -308,6 +308,12 @@ partially committed.
 The HTLC output has *timed out* once the depth of the latest block is equal to
 or greater than the HTLC `cltv_expiry`.
 
+> 各 HTLC output は、タイムアウト後にHTLC-timeout transaction を使用する *local offerer*、または payment preimage がある場合は* remote受信者*によってのみ使用できます。
+
+> output によって表されない HTLC が存在する可能性があります。それらがダストとしてトリミングされたため、またはトランザクションが部分的にのみコミットされたためです。
+
+> HTLC出力は、最新ブロックの深さがHTLC `cltv_expiry`以上になると*タイムアウト*しました。
+
 ### Requirements
 
 A node:

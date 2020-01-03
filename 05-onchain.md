@@ -343,6 +343,23 @@ A node:
     the HTLC.
       - MAY fail the corresponding incoming HTLC sooner.
 
+> A node：
+>  - commitment transaction HTLC output が payment preimage を使用して費やされた場合、出力は *irrevocably resolved* と見なされませす：
+>    - transaction input witness から payment preimage を抽出する必要があります。
+>  - commitment transaction HTLC output が *timed out* で、*resolve* されていない場合：
+>    - commitment transaction HTLC output を使用して、output を *resolve* する必要があります。
+>    - resolving transaction が妥当な深さに達すると：
+>      - 対応する incoming HTLC（存在する場合）に失敗する必要があります。
+>      - そのHTLC-timeout transaction の output を解決する必要があります。
+>      - HTLC-timeout transaction を convenient address に送信して解決する必要があります。
+>        - 注： output が（推奨されるように）消費されると、output は spending transaction によって *resolved* されます。それ以外の場合、 HTLC-timeout transaction 自体によって *resolved* と見なされます。
+>      - その HTLC-timeout output を費やす前に、（`OP_CHECKSEQUENCEVERIFY`遅延（リモートノードの `open_channel` `to_self_delay`フィールドで指定された）が経過するまで待機する必要があります。
+>  - commitment transactionで output を持たないコミット済み HTLC の場合：
+>    - commitment transaction が妥当な深さに達すると：
+>      - 対応する incoming HTLC （存在する場合）に失敗する必要があります。
+>    - *valid* commitment transaction にHTLCに対応する output が含まれていない場合。
+>      - 対応する incoming HTLC により早く失敗する場合があります。
+
 ### Rationale
 
 The payment preimage either serves to prove payment (when the offering node

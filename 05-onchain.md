@@ -388,6 +388,15 @@ race, does not switch to a commitment transaction that does contain the HTLC
 before the node fails it (hence the wait). The requirement that the incoming
 HTLC be failed before its own timeout still applies as an upper bound.
 
+> payment preimage は、支払いを証明するために（オファリングノードが支払いを開始したとき）、または別のピアからの対応する incoming HTLC を引き換える（オファリングノードが支払いを転送しているとき）のいずれかに役立ちます。ノードが支払いを抽出すると、HTLCを使用するトランザクション自体の運命を気にしなくなります。
+
+> 両方の解決が可能な場合（例えば、ノードがタイムアウト後に支払い成功を受け取った場合）、どちらの解釈も受け入れられます;これが発生する前にそれを費やすのは受信者の責任です。
+
+> ローカルノードが `update_fail_htlc` を使用して対応する incoming HTLC をバックフェイルする前に、リモートHTLCタイムアウトトランザクションを使用してHTLCをタイムアウトする必要があります（リモートノードがそれを実行して資金を要求するのを防ぐため） `permanent_channel_failure`）、[BOLT＃2]（02-peer-protocol.md＃forwarding-htlcs）で詳しく説明されています。incoming HTLC もチェーン上にある場合、ノードは単純にタイムアウトするまで待機する必要があります。早期障害を通知する方法はありません。
+
+> HTLCが小さすぎて *commitment transaction* に表示されない場合、すぐに安全に失敗する可能性があります。そうでない場合、HTLCが *local commitment
+transaction* にない場合、ノードは、ブロックチェーンの再編成、またはレースが、ノードが失敗する前にHTLCを含む commitment transaction に切り替えないことを確認する必要があります（したがって、待つ）。 incoming HTLC がタイムアウトになる前に失敗するという要件は、上限として適用されます。
+
 ## HTLC Output Handling: Local Commitment, Remote Offers
 
 Each HTLC output can only be spent by the recipient, using the HTLC-success

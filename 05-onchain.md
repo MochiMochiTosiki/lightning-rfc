@@ -404,6 +404,8 @@ transaction, which it can only populate if it has the payment
 preimage. If it doesn't have the preimage (and doesn't discover it), it's
 the offerer's responsibility to spend the HTLC output once it's timed out.
 
+> 各HTLC outputs は、HTLC-success transaction を使用して受信者のみが使用できます。HTLC-success transaction は、payment preimage がある場合にのみ入力できます。 payment preimage がない場合（および検出されない場合）、タイムアウトになったら HTLC output を使用するのは提供者の責任です。
+
 There are several possible cases for an offered HTLC:
 
 1. The offerer is NOT irrevocably committed to it. The recipient will usually
@@ -417,6 +419,14 @@ There are several possible cases for an offered HTLC:
    HTLC. In this case, the recipient must use the preimage, once it receives it
    from the outgoing HTLC; otherwise, it will lose funds by sending an outgoing
    payment without redeeming the incoming payment.
+
+
+> 提供されるHTLCには、いくつかのケースが考えられます。
+
+> 1. 申し出人は、取消不能な形でそれにコミットしません。 受信者は通常、preimage を認識しません。これは、完全にコミットされるまでHTLCを転送しないためです。 したがって、プリイメージを使用すると、この受信者が最終ホップであることがわかります。 したがって、この場合、HTLCがタイムアウトするのを許可するのが最善です。
+> 2. 申し出人は、申し出られたHTLCに取り消すことはできませんが、受信者はまだ outgoing HTLC にコミットしていません。 この場合、受信者は提供されたHTLCを転送またはタイムアウトできます。
+> 3. 受信者は、offered HTLC と引き換えに、outgoing HTLC にコミットしました。 この場合、受信側は outgoing HTLC から受信した preimage を使用する必要があります。 そうでない場合、入金を引き換えずに出金を送信することで資金を失います。
+
 
 ### Requirements
 
@@ -442,6 +452,20 @@ transaction itself.
 
 If it's NOT otherwise resolved, once the HTLC output has expired, it is
 considered *irrevocably resolved*.
+
+> A local node：
+>  - 提供された、および outgoing HTLC にコミットした unresolved HTLC output の payment preimage を受信する（または既に所有している）場合：
+>    - HTLC-success transaction を使用して、出力を使用して*解決*する必要があります。
+>    - その HTLC-success transaction の出力を解決する必要があります。
+>  - さもないと：
+>    - *リモートノード*がHTLCに取消不能にコミットされていない場合：
+>      - 出力を使用して*解決*してはなりません。
+>  - HTLC-success transaction output を便利なアドレスに送信して解決する必要があります。
+>  - HTLC-success transaction output を費やす前に、 `OP_CHECKSEQUENCEVERIFY` （*remote node's* `open_channel`の `to_self_delay`フィールドで指定される）が経過するまで待機する必要があります。
+
+> 出力が費やされる場合（推奨）、出力はspending transaction によって*解決*されます。それ以外の場合、HTLC-success transaction 自体によって*解決*と見なされます。
+
+> それ以外の方法で解決されない場合、HTLC output の有効期限が切れると、*取消不能に解決された*と見なされます。
 
 # Unilateral Close Handling: Remote Commitment Transaction
 

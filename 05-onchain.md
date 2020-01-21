@@ -476,6 +476,10 @@ There are no delays constraining node behavior in this case, so it's simpler for
 a node to handle than the case in which it discovers its local commitment
 transaction (see [Unilateral Close Handling: Local Commitment Transaction](#unilateral-close-handling-local-commitment-transaction)).
 
+> The *remote node's* commitment transaction *resolves* the funding transaction output.
+
+> この場合、ノードの動作を制限する遅延はないため、local commitment transaction を検出する場合よりもノードの処理が簡単です（[一方的クローズ処理：ローカルコミットトランザクション]（＃unilateral-close-handling-local -commitment-transaction））。
+
 ## Requirements
 
 A local node:
@@ -498,6 +502,19 @@ A local node:
     - otherwise (it is NOT able to handle the broadcast for some reason):
       - MUST send a warning regarding lost funds.
 
+> A local node:：
+>  - *リモートノード*によってブロードキャストされた *valid* commitment transaction を発見すると：
+>    - 可能なら：
+>      - 以下に指定されているように各出力を処理する必要があります。
+>      - 関連付けられた`to_remote` に関してアクションを実行しない場合があります。これは、*ローカルノード*へのP2WPKH出力です。
+>        - 注：`to_remote` は、commitment transaction自体によって`解決`されたと見なされます。
+>      - 関連付けられた`to_local`に関してアクションを実行しない場合があります。これは、*リモートノード*への payment output です。
+>        - 注：`to_local`はcommitment transaction 自体によって「解決」されたと見なされます。
+>      - [HTLC出力処理：リモートコミットメント、ローカルオファー]（＃htlc-output-handling-remote-commitment-local-offers）で指定されているように、自ら提供するHTLCを処理する必要があります
+>      - [HTLC出力処理：リモートコミットメント、リモートオファー]（＃htlc-output-handling-remote-commitment-remote-offers）で指定されているリモートノードによって提供されるHTLCを処理する必要があります。
+>    - それ以外の場合（何らかの理由でブロードキャストを処理できません）：
+>      - 資金の損失に関する警告を送信する必要があります。
+
 ## Rationale
 
 There may be more than one valid, *unrevoked* commitment transaction after a
@@ -513,6 +530,10 @@ commitment number is greater than expected. If both nodes support
 `per_commitment_point`, and thus can derive its own `remotepubkey` for the
 transaction, in order to salvage its own funds. Note: in this scenario, the node
 will be unable to salvage the HTLCs.
+
+> 署名が`commitment_signed`を介して受信された後、対応する`revoke_and_ack`の前に、複数の有効な*unrevoked* commitment transaction が存在する場合があります。 そのため、いずれかのコミットメントが*remote node's* commitment transactionとして機能します。 したがって、両方を処理するには local node が必要です。
+
+> データ損失の場合、ローカルノードは、*remote node's* commitment transaction HTLC outputs のすべてを認識しない状態になる可能性があります。 トランザクションに署名し、コミットメント番号が予想よりも大きいため、データ損失状態を検出できます。 両方のノードが `option_data_loss_protect` をサポートしている場合、ローカルノードはリモートの `per_commitment_point` を所有するため、独自の資金を回収するために、トランザクションに対して独自の `remotepubkey` を導出できます。 > 注：このシナリオでは、ノードはHTLCをサルベージできません。
 
 ## HTLC Output Handling: Remote Commitment, Local Offers
 

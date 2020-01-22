@@ -548,6 +548,12 @@ because the outputs were trimmed as dust, or because the remote node has two
 The HTLC output has *timed out* once the depth of the latest block is equal to
 or greater than the HTLC `cltv_expiry`.
 
+> 各HTLC output は、*local offerer*（タイムアウト後）、または*remote受信者*が、payment preimageがある場合に HTLC-success transaction を使用することによってのみ使用できます。
+
+> 出力によって表されないHTLCが存在する可能性があります。出力がダストとしてトリミングされたか、リモートノードに異なるHTLCを持つ2つの有効なcommitment transactions があるためです。
+
+> HTLC出力は、最新のブロックの深さがHTLC `cltv_expiry`以上になると*タイムアウト*しました。
+
 ### Requirements
 
 A local node:
@@ -567,6 +573,19 @@ A local node:
       - if no *valid* commitment transaction contains an output corresponding to
       the HTLC:
         - MAY fail it sooner.
+
+> A local node:
+>   - commitment transaction HTLC output がpayment preimage を使用して費やされる場合：
+>     - HTLC-success transaction input witness から payment preimage を抽出する必要があります。
+>       - 注： output は *irrevocably resolved* と見なされます。
+>   - commitment transaction HTLC output が*タイムアウト*で、*解決*されていない場合：
+>     - 便利なアドレスに費やすことにより、output を *resolve* しなければなりません。
+>   - このcommitment transaction で output を持たないコミット済みHTLCの場合：
+>     - commitment transaction が妥当な深さに達すると：
+>       - 対応する incoming HTLC（存在する場合）を失敗させる必要があります。
+>     - さもないと：
+>       - HTLCに対応する出力が *valid* commitment transaction に含まれていない場合：
+>         - より早く失敗する場合があります。
 
 ### Rationale
 

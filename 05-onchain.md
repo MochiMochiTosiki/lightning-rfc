@@ -636,6 +636,8 @@ payment preimage. If the local node does not have the preimage (and doesn't
 discover it), it's the remote node's responsibility to spend the HTLC output
 once it's timed out.
 
+> リモートHTLC出力は、ローカルノードが payment preimage を持っている場合にのみ使用できます。 ローカルノードに reimage がない場合（および検出されない場合）、タイムアウトになったらHTLC output を使用するのはリモートノードの責任です。
+
 There are actually several possible cases for an offered HTLC:
 
 1. The offerer is not irrevocably committed to it. In this case, the recipient
@@ -649,6 +651,12 @@ There are actually several possible cases for an offered HTLC:
    HTLC. In this case, the recipient must use the preimage, if it receives it
    from the outgoing HTLC; otherwise, it will lose funds by sending an outgoing
    payment without redeeming the incoming one.
+
+> 実際に、提供されるHTLCにはいくつかのケースが考えられます。
+
+> 1. 申し出人は、取消不能な形でそれにコミットしません。 この場合、受信者は通常、HTLCを完全にコミットするまで転送しないため、preimage を認識しません。 preimageを使用すると、この受信者が最終ホップであることが明らかになるため、HTLCがタイムアウトするのを許可するのが最善です。
+> 2. 申し出人は、offered HTLC に取り消すことはできませんが、受信者はまだ outgoing HTLC にコミットしていません。 この場合、受信者はそれを転送するか、タイムアウトになるのを待つことができます。
+> 3. 受信者は、outgoing HTLC と引き換えに outgoing HTLC にコミットしました。 この場合、受信HTLCから受信する場合、受信者はプリイメージを使用する必要があります。 それ以外の場合は、入金を償還せずに出金を送信することで資金を失います。
 
 ### Requirements
 

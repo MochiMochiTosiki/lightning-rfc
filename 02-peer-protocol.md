@@ -911,20 +911,20 @@ Fees") while maintaining its channel reserve.
 been received). It MUST continue incrementing instead.
 
 > sending node:
->   - 現在の `feerate_per_kw`での remote commitment transaction で支払うことができない `amount_msat` を提供してはいけません（"Updating
+> - 現在の `feerate_per_kw`での remote commitment transaction で支払うことができない `amount_msat` を提供してはいけません（"Updating
 Fees"を参照）。
->   - 0より大きい `amount_msat` を提供する必要があります。
->   - 受信ノードの `htlc_minimum_msat` の下に `amount_msat` を提供してはなりません
->   - `cltv_expiry` を 500000000未満に設定する必要があります。
->   - Bitcoin blockchain を識別する `chain_hash` を持つチャネルの場合：
->     - `amount_msat` の上位4バイトを0に設定しなければなりません。
->   - 結果が remote commitment transaction で、リモートの `max_accepted_htlcs` HTLC より多くを提供する場合：
->     - HTLCを追加しないでください。
->   - offerd HTLC の合計がリモートの `max_htlc_value_in_flight_msat` を超える場合：
->     - HTLCを追加しないでください。
->   - 最初の HTLC の場合：
->     -`id`を0に設定する必要があります。
->   - 連続するオファーごとに `id` の値を1ずつ増やす必要があります。
+> - 0より大きい `amount_msat` を提供する必要があります。
+>   - 受信ノードの `htlc_minimum_msat` の下に `amount_msat` を提供してはなりません
+>   - `cltv_expiry` を 500000000未満に設定する必要があります。
+>   - Bitcoin blockchain を識別する `chain_hash` を持つチャネルの場合：
+>     - `amount_msat` の上位4バイトを0に設定しなければなりません。
+>   - 結果が remote commitment transaction で、リモートの `max_accepted_htlcs` HTLC より多くを提供する場合：
+>     - HTLCを追加しないでください。
+>   - offerd HTLC の合計がリモートの `max_htlc_value_in_flight_msat` を超える場合：
+>     - HTLCを追加しないでください。
+>   - 最初の HTLC の場合：
+>     -`id`を0に設定する必要があります。
+>   - 連続するオファーごとに `id` の値を1ずつ増やす必要があります。
 
 > 更新が完了した後（つまり、`revoke_and_ack` を受信した後）、`id` を 0 にリセットしてはなりません。代わりにそれを増やし続けなければなりません。
 
@@ -948,20 +948,19 @@ A receiving node:
 
 > receiving node:
 >   - 0に等しい、または自身が設定した `htlc_minimum_msat` より小さい` amount_msat`を受信した場合：
->     - チャネルに失敗する必要があります。
+>     - チャネルに失敗する必要があります。
 >   - sending node が現在の `feerate_per_kw` で余裕がない `amount_msat` を受信した場合（チャネル予約を維持します）：
 >     - チャネルに失敗する必要があります。
->   - sending node が受信側の `max_accepted_htlcs` HTLCを local commitment transaction に追加する場合、または受信側の `max_htlc_value_in_flight_msat` 相当以上の HTLC を local commitment transaction 追加する場合：
->     - チャネルに失敗する必要があります。
->   - sending node が `cltv_expiry` を500000000以上に設定する場合：
->     - チャネルに失敗する必要があります。
->   - Bitcoin blockchain を識別する `chain_hash` を持つチャネルの場合、 `amount_msat` の最上位4バイトが0でない場合：
->     - チャネルに失敗する必要があります。
->   - 同じ `payment_hash` を持つ複数のHTLCを許可する必要があります。
->   - 送信者が以前にその HTLC の実行を確認しなかった場合：
->     - 再接続後に繰り返される `id` 値を無視する必要があります。
->   - 他の `id` 違反が発生した場合：
->     - チャネルが失敗する場合があります。
+>   - sending node が受信側の `max_accepted_htlcs` HTLCを local commitment transaction に追加する場合、または受信側の `max_htlc_value_in_flight_msat` 相当以上の HTLC を local commitment transaction 追加する場合：
+>     - チャネルに失敗する必要があります。
+>   - sending node が `cltv_expiry` を500000000以上に設定する場合：
+>     - チャネルに失敗する必要があります。
+>   - Bitcoin blockchain を識別する `chain_hash` を持つチャネルの場合、 `amount_msat` の最上位4バイトが0でない場合：
+>     - チャネルに失敗する必要があります。
+>   - 同じ `payment_hash` を持つ複数のHTLCを許可する必要があります。
+>     - 送信者が以前にその HTLC の実行を確認しなかった場合：
+>   - 再接続後に繰り返される `id` 値を無視する必要があります。
+>     - チャネルが失敗する場合があります。
 
 The `onion_routing_packet` contains an obfuscated list of hops and instructions for each hop along the path.
 It commits to the HTLC by setting the `payment_hash` as associated data, i.e. includes the `payment_hash` in the computation of HMACs.
@@ -1062,9 +1061,9 @@ A node:
 
 > node:
 >   - できるだけ早く HTLC を削除する必要があります。
->   - タイムアウトした HTLC に失敗する必要があります。
->   - 対応する HTLC が両サイドの commitment transactions で irrevocably committed されるまで：
->     - `update_fulfill_htlc`, `update_fail_htlc`、または `update_fail_malformed_htlc` を送信してはいけません。
+>   - タイムアウトした HTLC に失敗する必要があります。
+>   - 対応する HTLC が両サイドの commitment transactions で irrevocably committed されるまで：
+>     - `update_fulfill_htlc`, `update_fail_htlc`、または `update_fail_malformed_htlc` を送信してはいけません。
 
 A receiving node:
   - if the `id` does not correspond to an HTLC in its current commitment transaction:
@@ -1085,15 +1084,15 @@ A receiving node:
 
 > receiving node:
 >   - `id` が現在の commitment transaction の HTLC に対応しない場合：
->     - チャネルに失敗する必要があります。
->     - `update_fulfill_htlc` の `payment_preimage`値が、対応するHTLC `payment_hash` にSHA256 しない場合：
->       - チャネルに失敗する必要があります。
->     - `update_fail_malformed_htlc` に `failure_code` の `BADONION` bit が設定されていない場合：
->       - チャネルに失敗する必要があります。
->     - `update_fail_malformed_htlc` の `sha256_of_onion` が送信した onion と一致しない場合：
->       - 再試行するか、代替エラー応答を選択することができます。
->     - それ以外の場合、`update_fail_malformed_htlc` によってキャンセルされた発信HTLCを持つ受信ノード：
->     - 指定された `failure_code` を使用してデータを `sha256_of_onion` に設定し、HTLC を最初に送信したリンクに送信された `update_fail_htlc` でエラーを返さなければなりません。
+>     - チャネルに失敗する必要があります。
+>   - `update_fulfill_htlc` の `payment_preimage`値が、対応するHTLC `payment_hash` にSHA256 しない場合：
+>     - チャネルに失敗する必要があります。
+>   - `update_fail_malformed_htlc` に `failure_code` の `BADONION` bit が設定されていない場合：
+>     - チャネルに失敗する必要があります。
+>   - `update_fail_malformed_htlc` の `sha256_of_onion` が送信した onion と一致しない場合：
+>     - 再試行するか、代替エラー応答を選択することができます。
+>   - それ以外の場合、`update_fail_malformed_htlc` によってキャンセルされた発信HTLCを持つ受信ノード：
+>     - 指定された `failure_code` を使用してデータを `sha256_of_onion` に設定し、HTLC を最初に送信したリンクに送信された `update_fail_htlc` でエラーを返さなければなりません。
 
 #### Rationale
 
@@ -1154,10 +1153,10 @@ fee changes).
 
 > sending node:
 >   - アップデートを含まない `commitment_signed` メッセージを送信してはなりません。
->   - `commitment_signed` メッセージを送信して料金を変更します。
->   - 新しい取り消し番号を除いて、 commitment transaction を変更しない `commitment_signed` メッセージを送信することができます（dust、 同一の HTLC 交換、または重要でないまたは複数の料金変更）。
->   - コミットメントトランザクションの順序に対応するHTLCトランザクションごとに1つの「htlc_signature」を含める必要があります（[BOLT＃3]（03-transactions.md transaction-input-and-output-ordering）を参照）。
->   - remote node からメッセージを最近受信していない場合：
+>   - `commitment_signed` メッセージを送信して料金を変更します。
+>   - 新しい取り消し番号を除いて、 commitment transaction を変更しない `commitment_signed` メッセージを送信することができます（dust、 同一の HTLC 交換、または重要でないまたは複数の料金変更）。
+>   - コミットメントトランザクションの順序に対応するHTLCトランザクションごとに1つの「htlc_signature」を含める必要があります（[BOLT＃3]（03-transactions.md transaction-input-and-output-ordering）を参照）。
+>   - remote node からメッセージを最近受信していない場合：
 >     - `ping` を使用し、`commitment_signed` を送信する前に `pong` の返信を待つ必要があります。
 
 A receiving node:
@@ -1173,12 +1172,12 @@ A receiving node:
  
 > receiving node:
 >   - すべての保留中の更新が適用されると：
->     - `signature` が local commitment transaction に対して有効でない場合：
->       - チャネルに失敗する必要があります。
->     - `num_htlcs` が local commitment transaction の HTLC outputs の数と等しくない場合：
->       - チャネルに失敗する必要があります。
->   - 対応する HTLC transaction に対して `htlc_signature` が有効でない場合：
->     - チャネルに失敗する必要があります。
+>     - `signature` が local commitment transaction に対して有効でない場合：
+>       - チャネルに失敗する必要があります。
+>     - `num_htlcs` が local commitment transaction の HTLC outputs の数と等しくない場合：
+>       - チャネルに失敗する必要があります。
+>   - 対応する HTLC transaction に対して `htlc_signature` が有効でない場合：
+>     - チャネルに失敗する必要があります。
 >   - `revoke_and_ack` メッセージで応答する必要があります。
 
 #### Rationale
@@ -1241,7 +1240,7 @@ A sending node:
 
 > sending node:
 >   - `per_commitment_secret` を前の commitment transaction のキーを生成するために使用されるシークレットに設定する必要があります。
->   - `next_per_commitment_point`を次の commitment transaction の値に設定する必要があります。
+>   - `next_per_commitment_point`を次の commitment transaction の値に設定する必要があります。
 
 
 A receiving node:
@@ -1252,9 +1251,9 @@ A receiving node:
 
 > receiving node:
 >   - `per_commitment_secret` が以前の `per_commitment_point` を生成しない場合：
->     - チャネルに失敗する必要があります。
->   - `per_commitment_secret` が[BOLT＃3]のプロトコルによって生成されなかった場合（03-transactions.md＃per-commitment-secret要件）：
->     - チャネルが失敗する場合があります。
+>     - チャネルに失敗する必要があります。
+>   - `per_commitment_secret` が[BOLT＃3]のプロトコルによって生成されなかった場合（03-transactions.md＃per-commitment-secret要件）：
+>     - チャネルが失敗する場合があります。
 
 A node:
   - MUST NOT broadcast old (revoked) commitment transactions,
@@ -1265,9 +1264,9 @@ A node:
 
 > node:
 >   - 古い (revoked) commitment transactions をブロードキャストしてはいけません。
->     - 注：これを行うと、他のノードがすべてのチャネル資金を獲得できます。
->    - （失敗した接続のために）ブロードキャストしようとしない限り、commitment transactions に署名しないでください。
->     - 注：これは上記のリスクを減らすためです。
+>     - 注：これを行うと、他のノードがすべてのチャネル資金を獲得できます。
+>   - （失敗した接続のために）ブロードキャストしようとしない限り、commitment transactions に署名しないでください。
+>     - 注：これは上記のリスクを減らすためです。
 
 ### Updating Fees: `update_fee`
 
